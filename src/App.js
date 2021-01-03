@@ -1,7 +1,11 @@
 import React, {Component} from 'react';
 import './App.css';
 import Nav from './Component/Nav';
-import Article from './Component/Article';
+import ReadArticle from './Component/ReadArticle';
+import CreateArticle from './Component/CreateArticle';
+import UpdateArticle from './Component/UpdateArticle';
+import Control from './Component/Control';
+
 
 /*
 아래의 코드가 Component 를 만드는 것 입니다.
@@ -19,12 +23,13 @@ this.state = {
 를 작성해줌으로써 title 과 sub 값을 설정해준다.
 
 props 나 state 의 값이 바뀌면 해당되는 컴포넌트의 render 메소드가 실행된다.
+props 는 read-only 로 수정할 수 없고, state 는 수정이 가능하다.
 */
 class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      mode:'read',
+      mode:'welcome',
       selected_content_id:2,
       subject:{title:'WEB', sub:'"World Wide Web!'},
       welcome:{title:'Welcome', desc:'Welcome react'},
@@ -34,26 +39,64 @@ class App extends Component {
         {id:3, title:'JAVASCRIPT', desc:'JAVASCRIPT is Good'}
       ]
     }
+    this.max_content_id = this.state.navs.length;
   }
-  render(){
-    var _title, _desc = null;
+  getReadContent(){
+    var i = 0;
+    while(i < this.state.navs.length)
+    {
+      var data = this.state.navs[i];
+      if(data.id === this.state.selected_content_id){
+        return data;
+      }
+      i=i+1;
+    }
+  }
+  getArticle(){
+    var _title, _desc, _article = null;
     if(this.state.mode === 'welcome')
     {
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
+      _article = <ReadArticle title={_title} desc={_desc}></ReadArticle>
     }else if(this.state.mode ==='read'){
-      var i = 0;
-      while(i < this.state.navs.length)
-      {
-        var data = this.state.navs[i];
-        if(data.id === this.state.selected_content_id){
-          _title = data.title;
-          _desc = data.desc;
-          break;
-        }
-        i=i+1;
-      }
+      var _content = this.getReadContent();
+      _article = <ReadArticle title={_content.title} desc={_content.desc}></ReadArticle>
     }
+    else if(this.state.mode === 'create'){
+      _article = <CreateArticle onSubmit={function(_title, _desc){
+        this.max_content_id = this.max_content_id + 1;
+        var _navs = Array.from(this.state.navs);
+        _navs.push({id:this.max_content_id, title:_title, desc:_desc});
+        this.setState({
+          navs:_navs,
+          mode:'read',
+          selected_content_id:this.max_content_id
+        });
+      }.bind(this)}></CreateArticle>
+    }
+    else if(this.state.mode === 'update'){
+      var _nav = this.getReadContent();
+      _article = <UpdateArticle data={_nav} onSubmit={function(_id, _title, _desc){
+        var _navs = Array.from(this.state.navs);
+        var i=0;
+        while(i<_navs.length){
+          if(_navs[i].id === _id){
+            _navs[i] = {id:_id, title:_title, desc:_desc}
+            break;
+          }
+          i = i + 1;
+        }
+        this.setState({
+          navs:_navs,
+          mode:'read'
+        });
+      }.bind(this)}></UpdateArticle>
+    }
+    return _article;
+  }
+  render(){
+    
     return(
       <div className="App">
         {
@@ -61,7 +104,6 @@ class App extends Component {
             Subject 객체에 title, sub 와 onChangePage 라는 
             사용자 정의 함수를 만들고 Subject Class 에서
             a 태그 클릭 시  this.props.onChangePage(); 사용자 정의 함수를 실핸한다.
-
           */
         }
         <Subject 
@@ -72,7 +114,6 @@ class App extends Component {
           }.bind(this)}
           >
           </Subject>
-
         {/* 클릭 이벤트를 이용한 state 변환
         <header>
           <h1><a href="/" onClick={function(e) {
@@ -89,6 +130,29 @@ class App extends Component {
           {this.state.subject.sub}  
         </header>
         */}
+        <Control onChangeMode={function(_mode){
+          if(_mode === 'delete'){
+            if(window.confirm('삭제하시겠습니까?')){
+              var _navs = Array.from(this.state.navs);
+              var i = 0;
+              while(i < _navs.length){
+                if(_navs[i].id === this.state.selected_content_id){
+                  _navs.splice(i,1);
+                  break;
+                }
+                i=i+1;
+              }
+              this.setState({
+                mode:'welcome',
+                navs:_navs
+              });
+            }
+          }else{
+            this.setState({
+              mode:_mode
+            });
+          }
+        }.bind(this)}></Control>
         <Nav 
         nav={this.state.navs}
         onChangePage={function(id){
@@ -96,9 +160,8 @@ class App extends Component {
             mode:'read',
             selected_content_id:Number(id)
           });
-        }.bind(this)}
-        ></Nav>
-        <Article title={_title} Content={_desc}></Article>
+        }.bind(this)}></Nav>
+        {this.getArticle()}
       </div>
     );
   }

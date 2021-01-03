@@ -1,6 +1,13 @@
 import React, {Component} from 'react';
 
 class Nav extends Component{
+  /*shouldComponentUpdate 의 인자는 props 와 state 값이 변경되었을때의 값이며, return false 일 시 render() 함수를 실행하지 않는다. 주로 concat 함수와 같이 원본은 변하지 않을 때 원본데이터에 변화가 있는지 확인하기 위해 사용된다.
+  shouldComponentUpdate(newProps, newState){
+    if(this.props.data === newProps.data){
+      return false;
+    }
+    return true;
+  }*/
     render(){
         var lists = [];
         var data = this.props.nav;

@@ -1,14 +1,14 @@
 import React, {Component} from 'react';
 
-class Article extends Component{
+class ReadArticle extends Component{
     render(){
       return(
         <article>
           <h2>{this.props.title}</h2>
-          {this.props.Content}
+          {this.props.desc}
       </article>
       );
     }
   }
 
-  export default Article;
+  export default ReadArticle;
