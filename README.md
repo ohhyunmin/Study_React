@@ -1,3 +1,5 @@
+완료 - React 는 어떤 라이브러리인지, 어떻게 사용하는지 이해한다.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
